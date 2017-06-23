@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>jQuery UI Menu - Default functionality</title>
+  <!--
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="https://jqueryui.com/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  -->
+  <link rel="stylesheet" href="/css/jquery-ui.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/jquery-1.12.4.js"></script>
+  <script src="/js/jquery-ui.js"></script>
+
+    
+
+  <script>
+    $( function() {
+	$( "#menu" ).menu();
+    });
+  </script>
+
+    
+  <style>
+    .ui-menu { width: 150px;}
+  </style>
+</head>
+<body>
+  <ul id="menu">
+    <!--
+    <li class="ui-state-disabled"><div>Toys (n/a)</div></li>
+    -->
+    <li><div id="open_image">Image</div></li>
+    <li><div id="general_process">General Process</div>
+      <ul>
+	<li><div id="gray_scale">Gray Value</div></li>
+	<li><div id="sharpen">Sharpen</div></li>
+      </ul>
+    </li>
+    <!--
+    <li><div>Electronics</div>
+      <ul>
+	<li class="ui-state-disabled"><div>Home Entertainment</div></li>
+	<li><div>Car Hifi</div></li>
+	<li><div>Utilities</div></li>
+      </ul>
+    </li>
+    -->
+  </ul>
+  <script src="/js/functions.js"></script>
+
+</body>
+</html>
+
+
