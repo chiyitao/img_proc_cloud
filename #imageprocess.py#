@@ -24,12 +24,12 @@ class image_result_struct:
     img_data = []
     img_size = ()
     img_channel_num = 0
-    err_info = ''
-    def __init__(self, img_data, img_size, img_channel_num, err_info):
+    error_info = ''
+    def __init__(self, img_data, img_size, img_channel_num, error_info):
         self.img_data = img_data
         self.img_size = img_size
         self.img_channel_num = img_channel_num
-        self.err_info = error_info    
+        self.error_info = error_info    
 
 class ImageProcessModule():
     def __init__(self):
@@ -92,23 +92,6 @@ class ImageProcessModule():
 
     def _process_image(self, proc_op, src_img, proc_args):
         # don't check. Arguments were already checked in _image_operation
-
-        # TODO: Reconstruct the following code, seperate every
-        # function to their independent part.
-        dis_img = []
-        if proc_op == 'gray_scale':
-            dst_img = cv2.cvtColor(src_img, cv2.COLOR_BGR2GRAY)
-        elif proc_op == 'sharpen':
-            dst_img_x = cv2.Sobel(src_img, cv2.CV_16S, 1, 0)
-            dst_img_y = cv2.Sobel(src_img, cv2.CV_16S, 0, 1)
-
-            abs_x = cv2.convertScaleAbs(dst_img_x)
-            abs_y = cv2.convertScaleAbs(dst_img_y)
-
-            dst_img = cv2.addWeighted(abx_x, 0.5, abs_y, 0.5, 0)
-            
-            
-        
 
         
 
@@ -217,9 +200,7 @@ class ImageProcessModule():
             #     temp_image_file.write(line)
 
             src_img_proc_struct = self._req_data_2_img_proc_struct(req_data)
-
-            # destination image result struct
-            dst_img_irs = self._image_operation(src_img_proc_struct)
+            
             
             
 
@@ -260,20 +241,13 @@ class ImageProcessModule():
         # irs is defined as image result struct
         irs = image_result_struct([], (), 0, '')
         if ips.img_proc_op not in IMAGE_PROCESS_GENERAL_OP.values():
-            irs.err_info = 'operation is not defined.'            
+            irs.err_ips = 'operation is not defined.'            
             return irs
         if ips.img_data == []:
-            irs.err_info = 'image data is invalid.'
-            return irs
-        if ips.img_size == ():
-            irs.err_info = 'image size is invalid.'
-        # TODO: check other parameters.
-        
+            
 
         # get the image from ips
         src_img = self._get_image(ips.img_data, ips.img_size)
         # process the image
-        dst_img = self._process_image(ips.img_proc_op, src_img, ips.img_proc_args)
-        # convert dst_img to image_result_struct after every operation
-        # irs.img_data = dst_img.data
+        irs = self._process_image(ips.img_proc_op, src_img, ips.img_proc_args)
         return irs
