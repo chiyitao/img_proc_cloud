@@ -6,7 +6,7 @@ import cv2
 import string
 import array
 
-import json
+# import json
 
 IMAGE_PROCESS_URLS = {'1':'/general_process', '2':'/special_process', }
 
@@ -248,7 +248,7 @@ class ImageProcessModule():
             src_img_proc_struct = self._req_data_to_img_proc_struct(req_data)
             if self._validate_initial_ips(src_img_proc_struct) == False:
                 empty_irs_json = self._serialize_irs(image_result_struct([], (), 0, ''))
-                return 200, [json.dumps(empty_irs_json), ]
+                return 200, [empty_irs_json, ]
 
             # destination image result struct
             dst_img_irs = self._image_operation(src_img_proc_struct)
@@ -336,7 +336,7 @@ class ImageProcessModule():
             irs_img_channel_num = 1
         else:
             irs.img_channel_num = dst_img.shape[2]
-        irs.err_info = ''
+        irs.err_info = 'Success'
         return irs
 
 

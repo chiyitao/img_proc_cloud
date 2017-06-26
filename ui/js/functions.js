@@ -131,7 +131,7 @@ image_data_streamization.prototype.http_content_to_irs = function(irs_str) {
     var irs_img_channel_num = parseInt(irs_img_channel_num_str);
 
     // err_info
-    var irs_err_info = ''; // Success
+    var irs_err_info = irs_val_strs[irs_key_dict[3]]; // Success
 
     return new image_result_struct(irs_img_data, irs_img_size, irs_img_channel_num, irs_err_info);
 };
