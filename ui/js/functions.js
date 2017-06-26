@@ -57,8 +57,8 @@ $('#gray_scale').on('click', function() {
 	    // alert(xml_http.responseText);
 	    // eval('var irs_str = ' + xml_http.responseText + ';');
 	    var irs_str = xml_http.responseText;
-	    var irs_value = irs_str.split('\r\n');
-	    alert(irs_value[1]);
+	    var irs_values = irs_str.split('\r\n');
+	    alert(irs_values[1]);
 	    // alert(irs_str);
 	    
 	}
@@ -71,9 +71,52 @@ function image_result_struct(img_data, img_size, img_channel_num, err_info) {
     this.img_data = img_data;
     this.img_size = img_size;
     this.img_channel_num = img_channel_num;
-    this.err_info = err_info;
-}
+    this.err_info = err_info;    
+};
+
+// image data streamized class
+function image_data_streamization() = {
+    
+};
+
+image_data_streamization.prototype.http_content_to_irs = function(irs_str) {
+    var irs__key_dict = new Array("IMG_DATA", "IMG_SIZE", "IMG_CHANNEL_NUM", "ERR_INFO");
+    var irs_flags = new Array(4, false);
+    var irs_val_strs = new Array();
+    
+    if(irs_str == '') {
+	var err_info = 'Emtpy image_result_struct string.';	
+	return new image_result_struct(null, null, 0, err_info);
+    }    
+
+    // do the job
+    var irs_lines = irs_str.split('\r\n');
+    var i = 0;
+    for(key in irs_key_dict) {
+	if (irs_lines[i].indexOf(key)==0) {
+	    irs_val_strs[key] = irs_lines[i];
+	    irs_flags[key] = true;
+	}
+	i++;
+    }
+
+    // check the results
+    for(key in irs_key_dict) {
+	if (irs_flags[key] == false) {
+	    err_info = 'Incomplete image information.';
+	    return new image_result_struct(null, null, 0, err_info);
+	}
+    }
+
+    // parse and generate.
+    
+
+};
+
+
+
+// display the image data
 
 function putImageDataOnCanvas() {
-
+    
 }
