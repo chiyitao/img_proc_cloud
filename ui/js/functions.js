@@ -103,9 +103,11 @@ image_data_streamization.prototype.http_content_to_irs = function(irs_str) {
     // check the results
     for(key in irs_key_dict) {
 	if (irs_flags[key] == false) {
-	    err_info = 'Incomplete image result information.';
-	    // directly return the void result struct.
-	    return new image_result_struct(null, null, 0, err_info);
+	    if( key != "ERR_INFO") {
+		err_info = 'Incomplete image result information.';
+		// directly return the void result struct.
+		return new image_result_struct(null, null, 0, err_info);
+	    }
 	}
     }
 
@@ -139,6 +141,7 @@ image_data_streamization.prototype.http_content_to_irs = function(irs_str) {
 
 
 // display the image data
+function 
 
 function putImageDataOnCanvas() {
     
