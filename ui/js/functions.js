@@ -80,7 +80,7 @@ function image_data_streamization() = {
 };
 
 image_data_streamization.prototype.http_content_to_irs = function(irs_str) {
-    var irs__key_dict = new Array("IMG_DATA", "IMG_SIZE", "IMG_CHANNEL_NUM", "ERR_INFO");
+    var irs_key_dict = new Array("IMG_DATA", "IMG_SIZE", "IMG_CHANNEL_NUM", "ERR_INFO");
     var irs_flags = new Array(4, false);
     var irs_val_strs = new Array();
     
@@ -103,14 +103,37 @@ image_data_streamization.prototype.http_content_to_irs = function(irs_str) {
     // check the results
     for(key in irs_key_dict) {
 	if (irs_flags[key] == false) {
-	    err_info = 'Incomplete image information.';
+	    err_info = 'Incomplete image result information.';
+	    // directly return the void result struct.
 	    return new image_result_struct(null, null, 0, err_info);
 	}
     }
 
-    // parse and generate.
-    
+    // parse and generate irs.
 
+    // img_data
+    var irs_img_data_str = irs_val_strs[irs_key_dict[0]].split('=')[1]; // ugly :D
+    var irs_img_data_str_array = irs_img_data_str.split(', '); // the space cannot be omitted
+    var irs_img_data = irs_img_data_array.map(function(data_str) {
+	return parseInt(data_str);
+    });
+
+    // img_size
+    var irs_img_size_str = irs_val_strs[irs_key_dict[1]].split('=')[1];
+    var irs_img_size_str_array = irs_img_size_str.split(', '); // the space cannot be omitted
+    var irs_img_width = parseInt(irs_img_size_str_array[0].substr(1));
+    var irs_img_height_str_len = irs_img_size_str_array[1].length;
+    var irs_img_height = parseInt(irs_img_size_str_array[1].substr(0, irs_img_height_str_len-1));
+    var irs_img_size = new Array(irs_img_width, irs_img_height);
+
+    // img_channel_num
+    var irs_img_channel_num_str = irs_val_strs[irs_key_dict[2]].split('=')[1];
+    var irs_img_channel_num = parseInt(irs_img_channel_num_str);
+
+    // err_info
+    var irs_err_info = ''; // Success
+
+    return new image_result_struct(irs_img_data, irs_img_size, irs_img_channel_num, irs_err_info);
 };
 
 
