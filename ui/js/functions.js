@@ -36,19 +36,16 @@ $('#gray_scale').on('click', function() {
     // console.log('canvas.height: ' + canvas.height);
     var img_width = canvas.width;
     var img_height = canvas.height;
+    var img_channel_num = img_data.data.length / (img_width * img_height);
+    console.log('img_channel_num = ' + img_channel_num);
     var post_data = '';
-
-    /*
-    function concat_image_data(image_data) {
-	var img_data = [];
-    }
-    */
 
     // _temp_data = img_data.data
     post_data += 'IMG_PROC_OP=gray_scale\r\n';
     post_data += 'IMG_DATA=' + img_data.data + '\r\n';
     post_data += 'IMG_SIZE=(' + img_width + ',' + img_height + ')\r\n';
-    post_data += 'IMG_PROC_ARGS=\r\n';
+    post_data += 'IMG_CHANNEL_NUM=' + img_channel_num + '\r\n';
+    post_data += 'IMG_PROC_ARGS={' + '"null":"null"'  + '}\r\n';
     post_data += '\r\n\r\n\r\n\r\n'; // very important. self defined. end of stream.
 
     var xml_http = new XMLHttpRequest();
@@ -58,9 +55,25 @@ $('#gray_scale').on('click', function() {
     xml_http.onreadystatechange = function() {
 	if (xml_http.readyState == 4 && xml_http.status == 200) {
 	    // alert(xml_http.responseText);
+	    // eval('var irs_str = ' + xml_http.responseText + ';');
+	    var irs_str = xml_http.responseText;
+	    var irs_value = irs_str.split('\r\n');
+	    alert(irs_value[1]);
+	    // alert(irs_str);
 	    
 	}
     };
     xml_http.send(post_data);
     
 });
+
+function image_result_struct(img_data, img_size, img_channel_num, err_info) {
+    this.img_data = img_data;
+    this.img_size = img_size;
+    this.img_channel_num = img_channel_num;
+    this.err_info = err_info;
+}
+
+function putImageDataOnCanvas() {
+
+}

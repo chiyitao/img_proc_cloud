@@ -192,11 +192,18 @@ class WSGIServer(object):
             client_request_data = env['wsgi.input']
             # debug print
             request_lines = client_request_data.split('\r\n')
-            # for line in lines:
-            #     print line
+            # debug start
+
+            request_debug_file = open('request_file.txt', 'w')
+            request_debug_file.writelines(request_lines)
+            request_debug_file.close()
+            # for line in request_lines:
+            #      print line
+
+            # print t
             # debug end
             # just the image now
-            status, result_image = self.application.handle(request_path, request_lines)
+            (status, result_image) = self.application.handle(request_path, request_lines)            
             return (status, result_image)
             
 

@@ -6,6 +6,8 @@ import cv2
 import string
 import array
 
+import json
+
 IMAGE_PROCESS_URLS = {'1':'/general_process', '2':'/special_process', }
 
 IMAGE_PROCESS_GENERAL_OP = {'1':'gray_scale', '2': 'sharpen', '3': 'blur', }
@@ -18,7 +20,13 @@ class image_process_struct:
     img_proc_args = {}
 
     def __init__(self, img_proc_op, img_data, img_size, img_channel_num, img_proc_args):
-        pass
+        self.img_proc_op = img_proc_op
+        self.img_data = img_data
+        self.img_size = img_size
+        self.img_channel_num = img_channel_num
+        self.img_proc_args = img_proc_args
+
+
 
 class image_result_struct:
     img_data = []
@@ -29,30 +37,51 @@ class image_result_struct:
         self.img_data = img_data
         self.img_size = img_size
         self.img_channel_num = img_channel_num
-        self.err_info = error_info    
+        self.err_info = err_info    
 
 class ImageProcessModule():
     def __init__(self):
         pass
 
-    def _req_data_2_img_proc_struct(self, req_data):
+    def _req_data_to_img_proc_struct(self, req_data):
         img_proc_op_line = ''
         img_data_line = array.array('c')
         img_size_line = ''
         img_channel_num_line = ''
         img_proc_args_line = ''
 
+        # if any of the above line is not found
+        # then 
+        img_struct_flags = {'IMG_PROC_OP' : False,
+                            'IMG_DATA' : False,
+                            'IMG_SIZE' : False,
+                            'IMG_CHANNEL' : False,
+                            'IMG_PROC_ARGS' : False                            
+        }
+        
         for line in req_data:
-            if line.startwith('IMG_PROC_OP'):
+            if line.startswith('IMG_PROC_OP'):
                 img_proc_op_line = line
-            elif line.startwith('IMG_DATA'):
+                img_struct_flags['IMG_PROC_OP'] = True
+            elif line.startswith('IMG_DATA'):
                 img_data_line = line
-            elif line.startwith('IMG_SIZE'):
+                img_struct_flags['IMG_DATA'] = True
+            elif line.startswith('IMG_SIZE'):
                 img_size_line = line
-            elif line.startwith('IMG_CHANNEL'):
+                img_struct_flags['IMG_SIZE'] = True
+            elif line.startswith('IMG_CHANNEL'):
                 img_channel_num_line = line
-            elif line.startwith('IMG_PROC_ARGS'):
+                img_struct_flags['IMG_CHANNEL'] = True
+            elif line.startswith('IMG_PROC_ARGS'):
                 img_proc_args_line = line
+                img_struct_flags['IMG_PROC_ARGS'] = True
+            else:
+                # To add other parameters
+                pass
+
+        for key in img_struct_flags:
+            if img_struct_flags[key] == False:
+                return image_process_struct('', [], (), 0, '')
 
         # process the corresoponding data
 
@@ -65,15 +94,15 @@ class ImageProcessModule():
         # version 0.1
         # split image data according to comma char
         img_data_value_str = img_data_line.split('=')[1]
-        img_data_array_str = numpy.array(img_data.split(','))
+        img_data_array = numpy.array(img_data_value_str.split(','))
         # print 'length of img_data_str is %d' % len(img_data_str)
-        img_data = img_data_values.astype(numpy.uint8)
+        img_data = img_data_array.astype(numpy.uint8)
 
         # img_size        
         img_size_tuple_str = img_size_line.split('=')[1]
         img_size_str = img_size_tuple_str[1:-1].split(',')
         img_width = int(img_size_str[0])
-        img_height = int(img_size_info[1])
+        img_height = int(img_size_str[1])
         img_size = (img_width, img_height)
 
         # img_channel_num
@@ -87,7 +116,7 @@ class ImageProcessModule():
             img_proc_args = img_proc_args_dict_str
             
         return image_process_struct(
-            img_data, img_size, img_channel_num, img_proc_args            
+            img_proc_op, img_data, img_size, img_channel_num, img_proc_args            
             )
 
     def _process_image(self, proc_op, src_img, proc_args):
@@ -106,11 +135,10 @@ class ImageProcessModule():
             abs_y = cv2.convertScaleAbs(dst_img_y)
 
             dst_img = cv2.addWeighted(abx_x, 0.5, abs_y, 0.5, 0)
-            
-            
-        
+        else:
+            print 'the operation is not defined!'
 
-        
+        return dst_img        
 
 
     def _get_image(self, img_data, img_size):
@@ -118,7 +146,7 @@ class ImageProcessModule():
         img_height = img_size[1]
         img_data_len = img_data.size
 
-        src_img = numpy.array()
+        src_img = []
         if img_width * img_height == img_data_len:
             # grayscale image
             src_img = img_data.reshape(img_width, img_height)
@@ -195,6 +223,7 @@ class ImageProcessModule():
         return img_data
     
     def handle(self, req_path, req_data):
+
         if req_path == IMAGE_PROCESS_URLS['1']:
             # general_process
             # print 'general_process!'
@@ -209,52 +238,70 @@ class ImageProcessModule():
             #     print line
 
             # debug
-            temp_image_file = open('temp_image.txt', 'w')
-            temp_image_file.writelines(req_data)
-            temp_image_file.close()
+            # temp_image_file = open('temp_image.txt', 'w')
+            # temp_image_file.writelines(req_data)
+            # temp_image_file.close()
             
             #for line in req_data:
             #     temp_image_file.write(line)
 
-            src_img_proc_struct = self._req_data_2_img_proc_struct(req_data)
+            src_img_proc_struct = self._req_data_to_img_proc_struct(req_data)
+            if self._validate_initial_ips(src_img_proc_struct) == False:
+                empty_irs_json = self._serialize_irs(image_result_struct([], (), 0, ''))
+                return 200, [json.dumps(empty_irs_json), ]
 
             # destination image result struct
             dst_img_irs = self._image_operation(src_img_proc_struct)
-            
-            
 
-            img_data_pair = array.array('c')
-            img_size_pair = ''
-            for line in req_data:
-                if line.find('IMG_DATA') == 0:
-                    img_data_pair = line
-                if line.find('IMG_SIZE') == 0:
-                    img_size_pair = line
+            # serialize
+            irs_json = self._serialize_irs(dst_img_irs)
 
-            # image_process_struct
-            
-            
-            # src_img is an array of numpy
-            src_img = self._convert_to_image(img_data_pair, img_size_pair)
-            if src_img == []:
-                return 200, ['Image data error', ]
+            return 200, [irs_json, ]
 
-            # do the job
-            gray_scale_img = cv2.cvtColor(src_img, cv2.COLOR_BGR2GRAY)
-            
-
-            ips = image_process_struct()
-            ips.img_data = gray_scale_image.data
-            ips.img_size = gray_scale_image.shape[:2]
-            ips.img_channel_num = grayscale_image[2]
-            return 200, [gray_scale_img.data, ]
         elif req_path == IMAGE_PROCESS_URLS['2']:
-            return 404, ['Not implemented!', ]
+            # TODO: define special operations and handle the irs properly.
+            dst_irs = image_result_struct([], (), 0, '')
+            dst_irs.err_info = 'Not implemented!'
+
+            irs_json = self._serialize_irs(dst_irs)
+            
+            return 404, [irs_json, ]
         else:
             return 404, ['The page requested is not found.', ]
 
+            
+            
 
-    def _image_operation(ips):
+            # img_data_pair = array.array('c')
+            # img_size_pair = ''
+            # for line in req_data:
+            #     if line.find('IMG_DATA') == 0:
+            #         img_data_pair = line
+            #     if line.find('IMG_SIZE') == 0:
+            #         img_size_pair = line
+
+
+            
+            
+            # src_img is an array of numpy
+            # src_img = self._convert_to_image(img_data_pair, img_size_pair)
+            # if src_img == []:
+            #     return 200, ['Image data error', ]
+
+            # do the job
+            # gray_scale_img = cv2.cvtColor(src_img, cv2.COLOR_BGR2GRAY)
+            
+
+            # ips = image_process_struct()
+            # ips.img_data = gray_scale_image.data
+            # ips.img_size = gray_scale_image.shape[:2]
+            # ips.img_channel_num = grayscale_image[2]
+            # return 200, [gray_scale_img.data, ]
+
+        
+
+
+    def _image_operation(self, ips):
         # ips is defined as image process struct
 
         # irs is defined as image result struct
@@ -267,6 +314,7 @@ class ImageProcessModule():
             return irs
         if ips.img_size == ():
             irs.err_info = 'image size is invalid.'
+            return irs
         # TODO: check other parameters.
         
 
@@ -274,6 +322,36 @@ class ImageProcessModule():
         src_img = self._get_image(ips.img_data, ips.img_size)
         # process the image
         dst_img = self._process_image(ips.img_proc_op, src_img, ips.img_proc_args)
+
+        if dst_img == []:
+            irs.img_data = []
+            irs.img_size = ()
+            irs.err_info == 'there is some error during the processing of image.'
+            return irs
+                
         # convert dst_img to image_result_struct after every operation
-        # irs.img_data = dst_img.data
+        irs.img_data = dst_img.data
+        irs.img_size = dst_img.shape[:2]
+        if len(dst_img.shape) == 2:
+            irs_img_channel_num = 1
+        else:
+            irs.img_channel_num = dst_img.shape[2]
+        irs.err_info = ''
         return irs
+
+
+    def _serialize_irs(self, irs):
+        irs_str = 'IMG_DATA=' +  str(irs.img_data) + '\r\n' + \
+        'IMG_SIZE=' + str(irs.img_size) + '\r\n' + \
+        'IMG_CHANNEL_NUM=' + str(irs.img_channel_num) + '\r\n' + \
+        'ERR_INFO=' + irs.err_info + '\r\n'
+        return irs_str
+    
+    def _validate_initial_ips(self, ips):
+        # print ips
+        if (ips.img_proc_op == '') or (ips.img_data == [] ) or (ips.img_size == ()) or (ips.img_channel_num == 0) or (ips.img_proc_args == ''):
+            return False
+        else:
+            return True
+        
+        
