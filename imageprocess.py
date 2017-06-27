@@ -263,14 +263,16 @@ class ImageProcessModule():
             dst_irs = image_result_struct([], (), 0, '')
             dst_irs.err_info = 'Not implemented!'
 
-            irs_json = self._serialize_irs(dst_irs)
+            irs_str = self._serialize_irs(dst_irs)
             
-            return 404, [irs_json, ]
+            return 404, [irs_str, ]
         else:
-            return 404, ['The page requested is not found.', ]
+            null_irs = image_result_struct([], (), 0, '')
+            null_irs.err_info = 'The page requested is not found.'
 
+            irs_str = self._serialize_irs(null_irs)
             
-            
+            return 404, [irs_str, ]            
 
             # img_data_pair = array.array('c')
             # img_size_pair = ''
@@ -330,7 +332,8 @@ class ImageProcessModule():
             return irs
                 
         # convert dst_img to image_result_struct after every operation
-        irs.img_data = dst_img.data
+        # irs.img_data = dst_img.data
+        irs.img_data = dst_img
         irs.img_size = dst_img.shape[:2]
         if len(dst_img.shape) == 2:
             irs_img_channel_num = 1
@@ -341,10 +344,25 @@ class ImageProcessModule():
 
 
     def _serialize_irs(self, irs):
-        irs_str = 'IMG_DATA=' +  str(irs.img_data) + '\r\n' + \
+        # set
+        numpy.set_printoptions(threshold='nan')
+
+        irs_img_data_array = numpy.array2string(irs.img_data, max_line_width='nan', separator=',')
+
+        # hack way to get a plain text str of array
+        str_temp = irs_img_data_array.replace('\n', '')
+        irs_img_data_array.replace('\r', '')
+        
+        
+        irs_str = 'IMG_DATA=' + str_temp + '\r\n' + \
         'IMG_SIZE=' + str(irs.img_size) + '\r\n' + \
         'IMG_CHANNEL_NUM=' + str(irs.img_channel_num) + '\r\n' + \
         'ERR_INFO=' + irs.err_info + '\r\n'
+        # debug start
+        irs_str_file = open('irs_str.txt', 'w')
+        irs_str_file.writelines(irs_str)
+        irs_str_file.close()
+        # debug end
         return irs_str
     
     def _validate_initial_ips(self, ips):

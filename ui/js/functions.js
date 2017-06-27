@@ -55,10 +55,18 @@ $('#gray_scale').on('click', function() {
     xml_http.onreadystatechange = function() {
 	if (xml_http.readyState == 4 && xml_http.status == 200) {
 	    // alert(xml_http.responseText);
-	    // eval('var irs_str = ' + xml_http.responseText + ';');
 	    var irs_str = xml_http.responseText;
-	    var irs_values = irs_str.split('\r\n');
-	    alert(irs_values[1]);
+	    // streamization/destreamization object
+	    var img_res_stream = new image_result_streamization();
+	    // destreamized
+	    var irs = img_res_stream.http_content_to_irs(irs_str);
+	    // display the image data
+	    var start_left_top_pos = new point(0, 0);
+	    var img_disp = new image_display();
+	    var canvas_id = "src_canvas";
+	    img_disp.put_image_data_on_canvas(irs, canvas_id, start_left_top_pos);
+	    
+	    // alert(irs_values[1]);
 	    // alert(irs_str);
 	    
 	}
@@ -74,15 +82,19 @@ function image_result_struct(img_data, img_size, img_channel_num, err_info) {
     this.err_info = err_info;    
 };
 
-// image data streamized class
-function image_data_streamization() = {
+// image result streamized class
+function image_result_streamization() {
     
 };
 
-image_data_streamization.prototype.http_content_to_irs = function(irs_str) {
-    var irs_key_dict = new Array("IMG_DATA", "IMG_SIZE", "IMG_CHANNEL_NUM", "ERR_INFO");
-    var irs_flags = new Array(4, false);
-    var irs_val_strs = new Array();
+image_result_streamization.prototype.http_content_to_irs = function(irs_str) {
+    // var irs_key_dict = new Array('IMG_DATA', 'IMG_SIZE', 'IMG_CHANNEL_NUM', 'ERR_INFO');
+    var irs_key_dict = {irs_img_data: 'IMG_DATA',
+			irs_img_size: 'IMG_SIZE',
+			irs_img_channel_num: 'IMG_CHANNEL_NUM',
+			irs_err_info: 'ERR_INFO'};
+    var irs_flags = {};
+    var irs_val_strs = {};
     
     if(irs_str == '') {
 	var err_info = 'Emtpy image_result_struct string.';	
@@ -92,15 +104,28 @@ image_data_streamization.prototype.http_content_to_irs = function(irs_str) {
     // do the job
     var irs_lines = irs_str.split('\r\n');
     var i = 0;
+    // alert('irs_str.length is ' + irs_lines.length);
+
+    /*
+    for(var i = 0; i < irs_lines.length; i++) {
+	alert(irs_lines[i]);
+    }
+    */
     for(key in irs_key_dict) {
-	if (irs_lines[i].indexOf(key)==0) {
-	    irs_val_strs[key] = irs_lines[i];
-	    irs_flags[key] = true;
+	// alert('irs_lines[' + i +'] is' + irs_lines[0]);
+	if (irs_lines[i].indexOf(irs_key_dict[key])==0) {
+	    // alert('key is ' + key);
+	    irs_val_strs[irs_key_dict[key]] = irs_lines[i];
+	    irs_flags[irs_key_dict[key]] = true;
 	}
 	i++;
     }
+    
+    // for
+    // alert(irs_lines[1]);
+    // alert("IMG_SIZE: --" + irs_val_strs["IMG_SIZE"]);
 
-    // check the results
+    // check the result
     for(key in irs_key_dict) {
 	if (irs_flags[key] == false) {
 	    if( key != "ERR_INFO") {
@@ -114,26 +139,55 @@ image_data_streamization.prototype.http_content_to_irs = function(irs_str) {
     // parse and generate irs.
 
     // img_data
-    var irs_img_data_str = irs_val_strs[irs_key_dict[0]].split('=')[1]; // ugly :D
-    var irs_img_data_str_array = irs_img_data_str.split(', '); // the space cannot be omitted
-    var irs_img_data = irs_img_data_array.map(function(data_str) {
-	return parseInt(data_str);
-    });
+    var irs_img_data_str = irs_val_strs[irs_key_dict['irs_img_data']].split('=')[1]; // ugly :D
+    // var irs_img_data_array_str = irs_img_data_str.replace(/ /g, ',');
+
+    // var irs_img_data_str_decoded = window.atob(irs_img_data_array);
+    // var irs_img_data_str_array = new Uint8Array(irs_img_data_str);
+    // var irs_img_data_str_array = irs_img_data_str.split(""); // the space cannot be omitted
+
+    // var temp_array_str = '[[1,2], [2,3]]';
+    // var temp_array = JSON.parse(temp_array_str);
+
+    // eval('var irs_img_data = ' + irs_img_data_array_str); // got the img_data array
+
+    
+
+    var irs_img_data = JSON.parse(irs_img_data_array_str); // got the img_data array
+
+    
+    
+    // var irs_img_data_buffer = new ArrayBuffer(irs_img_data_str_decoded);
+    // var uint8_view = new Uint8Array(irs_img_data_buffer);
+    
+    // for (var i = 0; i < irs_img_data_str.length; i++) {
+    //      var c = irs_img_data_str.charAt(i);
+	// irs_img_data_array[i] = 
+    // }
+    // var irs_img_data = irs_img_data_str_array.map(function(data_char) {
+    //     return uint8(data_char);
+    // });
+    
+    // var irs_img_data = irs_img_data_str;
 
     // img_size
-    var irs_img_size_str = irs_val_strs[irs_key_dict[1]].split('=')[1];
+    var irs_img_size_str = irs_val_strs[irs_key_dict['irs_img_size']].split('=')[1];
     var irs_img_size_str_array = irs_img_size_str.split(', '); // the space cannot be omitted
     var irs_img_width = parseInt(irs_img_size_str_array[0].substr(1));
     var irs_img_height_str_len = irs_img_size_str_array[1].length;
     var irs_img_height = parseInt(irs_img_size_str_array[1].substr(0, irs_img_height_str_len-1));
     var irs_img_size = new Array(irs_img_width, irs_img_height);
 
+    // debug
+
+    // alert(irs_img_size_str);
+
     // img_channel_num
-    var irs_img_channel_num_str = irs_val_strs[irs_key_dict[2]].split('=')[1];
+    var irs_img_channel_num_str = irs_val_strs[irs_key_dict['irs_img_channel_num']].split('=')[1];
     var irs_img_channel_num = parseInt(irs_img_channel_num_str);
 
     // err_info
-    var irs_err_info = irs_val_strs[irs_key_dict[3]]; // Success
+    var irs_err_info = irs_val_strs[irs_key_dict['irs_err_info']]; // Success
 
     return new image_result_struct(irs_img_data, irs_img_size, irs_img_channel_num, irs_err_info);
 };
@@ -141,8 +195,36 @@ image_data_streamization.prototype.http_content_to_irs = function(irs_str) {
 
 
 // display the image data
-function 
+function image_display() {
 
-function putImageDataOnCanvas() {
-    
 }
+
+function point(x, y) {
+    this.x = x;
+    this.y = y;
+}
+
+// put image on canvas
+// pos is the left top corner
+image_display.prototype.put_image_data_on_canvas = function(irs, canvas_id, start_pos) {
+    
+    var inner_canvas = document.getElementById(canvas_id);
+
+    if (inner_canvas == null) {
+	// alert and do nothing
+	alert("dest canvas is null.");
+	return;
+    }
+
+    // decompose the irs to a real bitmap.
+    var img_data = irs.img_data;
+    // draw the canvas
+    var ctx = inner_canvas.getContext('2d');
+    ctx.putImageData(img_data, start_pos.x, start_pos.y, irs.img_size[0], irs.img_size[1]);
+    
+};
+
+image_display.prototype.convert_irs_to_image = function(irs) {
+    
+
+};
