@@ -120,6 +120,9 @@ image_result_streamization.prototype.http_content_to_irs = function(irs_str) {
 	}
 	i++;
     }
+
+    // debug    
+    // alert(irs_lines[0].length);
     
     // for
     // alert(irs_lines[1]);
@@ -149,11 +152,23 @@ image_result_streamization.prototype.http_content_to_irs = function(irs_str) {
     // var temp_array_str = '[[1,2], [2,3]]';
     // var temp_array = JSON.parse(temp_array_str);
 
-    // eval('var irs_img_data = ' + irs_img_data_array_str); // got the img_data array
+    // eval('var irs_img_data = ' + irs_img_data_array_str); // got the img_data array    
 
-    
+    var irs_img_data_two_dim = JSON.parse(irs_img_data_str); // got the img_data array
 
-    var irs_img_data = JSON.parse(irs_img_data_array_str); // got the img_data array
+    // convert to one-dimension array
+    var irs_img_data = new Array();
+    for (var i = 0; i < irs_img_data_two_dim.length; i++) {
+	var sub_array_len = irs_img_data_two_dim[i].length; 
+	for(var j = 0; j < sub_array_len; j++) {
+	    irs_img_data[i * sub_array_len + j] = irs_img_data_two_dim[i][j];
+	}
+    }
+
+    // end of irs_img_data
+
+    // alert(irs_img_data.length);
+    // alert(irs_img_data[331].length);
 
     
     
@@ -216,15 +231,66 @@ image_display.prototype.put_image_data_on_canvas = function(irs, canvas_id, star
 	return;
     }
 
+    var ctx = inner_canvas.getContext('2d'); // this is needed to create the ImageData
+
     // decompose the irs to a real bitmap.
-    var img_data = irs.img_data;
+    var js_img_data = this.convert_to_js_ImageData(ctx, irs.img_data, irs.img_size, irs.img_channel_num);
+    // debug
+    // alert(js_img_data.length);
+
     // draw the canvas
-    var ctx = inner_canvas.getContext('2d');
-    ctx.putImageData(img_data, start_pos.x, start_pos.y, irs.img_size[0], irs.img_size[1]);
-    
+
+    if(js_img_data != null){
+	ctx.putImageData(js_img_data, start_pos.x, start_pos.y, 0, 0, irs.img_size[0], irs.img_size[1]);
+    }
 };
 
-image_display.prototype.convert_irs_to_image = function(irs) {
-    
 
+
+image_display.prototype.convert_to_js_ImageData = function(ctx, img_data, img_size, img_channel_num) {
+    // TODO: make complete argument check with every argument
+    if (img_data == null || img_size == null || img_channel_num == null)
+	return null;
+
+    // do the job
+    
+    var js_ImageData = ctx.createImageData(img_size[0], img_size[1]);
+    if (img_channel_num == 1) {
+	// gray scale image, single channel
+	for (var i = 0; i < img_data.length; i++) {
+	    js_ImageData.data[4 * i + 0] = img_data[i];
+	    js_ImageData.data[4 * i + 1] = img_data[i];
+	    js_ImageData.data[4 * i + 2] = img_data[i];
+	    js_ImageData.data[4 * i + 3] = 255;
+	}
+	// return js_img_data;
+    }
+    else if (img_channel_num == 3) {
+	// color image, must append the alpha value
+	var img_pixel_count = img_data.length / 3;
+	for (var i = 0; i < img_pixel_count; i++) {
+	    js_ImageData.data[4 * i + 0] = img_data[3 * i + 0];
+	    js_ImageData.data[4 * i + 1] = img_data[3 * i + 1];
+	    js_ImageData.data[4 * i + 2] = img_data[3 * i + 2];
+	    js_ImageData.data[4 * i + 3] = 255;
+	}
+	// return js_img_data;
+    }
+    else {
+	// rgba image, keep it as origin
+	var img_pixel_count = img_data.length / 4;
+	for (var i = 0; i < img_pixel_count; i++) {
+	    js_ImageData.data[4 * i + 0] = img_data[4 * i + 0];
+	    js_ImageData.data[4 * i + 1] = img_data[4 * i + 1];
+	    js_ImageData.data[4 * i + 2] = img_data[4 * i + 2];
+	    js_ImageData.data[4 * i + 3] = img_data[4 * i + 3];
+	}
+	// js_img_data = img_data;
+    }
+
+
+    // image_data.data = js_img_data;
+    // image_data.width = img_size[0]; // width
+    // image_data.height = img_size[1]; // height
+    return js_ImageData;
 };

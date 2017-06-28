@@ -335,10 +335,17 @@ class ImageProcessModule():
         # irs.img_data = dst_img.data
         irs.img_data = dst_img
         irs.img_size = dst_img.shape[:2]
+
+        # debug
+        # print 'len of dst_img.shape = ' + str(len(dst_img.shape))
+        # debug end
+        
         if len(dst_img.shape) == 2:
-            irs_img_channel_num = 1
+            irs.img_channel_num = 1
         else:
             irs.img_channel_num = dst_img.shape[2]
+        # print 'irs.img_channel_num' + str(irs.img_channel_num)
+        
         irs.err_info = 'Success'
         return irs
 
