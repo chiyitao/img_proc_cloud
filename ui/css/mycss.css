@@ -1,0 +1,257 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    background:#e5e6d0;
+}
+
+#header, #menu, #banner, #footer {
+    margin: 0px auto;
+    width: 1200px;
+}
+
+#header {
+    height: 100px;
+    background: #F0FFFF;
+}
+
+#header h1 {
+    float: left;
+    margin-top: 20px;
+}
+
+#header h1 a{
+
+    width: 600px;
+    height: 100px;
+    display: block;
+    color: #996600;
+    text-align: center;
+    text-decoration: none;
+}
+
+#header ul {
+    float:left;
+    padding:50px 0px 0px 300px;
+    list-style:none;
+}
+
+#header ul li {
+    float: left;
+    padding: 0px 20px;
+}
+
+#header ul li a {
+    color:#ff6600;
+    text-decoration:none;
+    font-size:20px;
+}
+
+#header ul li a:hover {
+    color:#000;
+    text-decoration:underline;
+}
+
+/*  */
+.clear {
+    clear:both;
+}
+
+#menu {
+    padding-top:3px;
+}
+
+#menu ul {
+    list-style:none;
+}
+
+#menu ul li {
+    float:left;
+}
+
+#menu ul li a {
+    color: #660066;
+    text-decoration: none;
+    text-align:center;
+    display:block; /* 使center生效 */
+    width:135px;
+    height:56px;
+    line-height:56px;
+    font-size:25px;
+}
+
+#menu ul li a:hover {
+    background: #177cb7;
+}
+
+#menu ul li ul {
+    display: none;
+    width: 135px;
+    position: absolute;
+    background: #C0C0C0;
+}
+
+#menu ul li:hover ul {
+    display: block;
+    font-size: 25px;
+}
+
+#menu ul li ul li {    
+    width: 135px;
+}
+
+#menu ul li ul li a {
+    width: 135px;
+}
+
+#menu ul li ul li a:hover {    
+    background: #BBFFFF;
+}
+
+#main {
+    margin: 0 auto;
+    width: 1100px;
+    padding: 10px 10px;    
+}
+
+#main .container {
+    margin: 0 auto;
+    width: 1100px;
+    float: left;
+}
+
+#main .container dl h5, #main .product h5 {
+    border-bottom: 1px solid #000;
+    margin-bottom: 15px;
+    font-size: 25px;
+}
+
+#main .container dl h5 a {
+    margin: 0 auto;
+    text-decoration: none;
+}
+
+#main .container dl dt {
+    float: left;
+    width: 150px;
+}
+
+#main .container dl dt img {
+    border: 1px solid #ccc;
+    width: 150px;
+    height: 250px;
+}
+
+#main .container dl.xuexiao {
+    margin-right: 40px;
+}
+
+#main .container dl.xuexiao dd {
+    font-size: 16px;
+    margin-left: 25px;
+    float: left;
+    width: 240px;
+    text-indent: 2em; 
+}
+
+#main .container dl.xinwen dd {
+    height: 22px;
+    line-height: 22px;
+    background: none;
+}
+
+#main .container dl.xinwen dd a {
+    color: #000000;
+    text-decoration: none;
+    padding-left: 10px;
+}
+
+#main .container dl.xinwen dd span {
+    padding-left: 10px;
+}
+
+#main .product {
+    padding-top: 20px;
+}
+
+#main .product h5 a {
+    margin: 0px auto;
+    text-decoration: none;
+}
+
+#main .product ul li {
+    float: left;
+    padding-left: 10px;
+    list-style: none;
+}
+
+#main .product ul li a {
+    text-decoration: none;
+}
+
+#main .subMenu {
+    width: 300px;
+    float: left;
+    margin: 10px 0px;
+}
+
+#main .subMenu h5 {
+    background: #19577c;
+    height: 39px;
+    text-align: center;
+    color: #fff;
+    line-height: 39px;
+}
+
+#main .subMenu ul li {
+    border-bottom: 1px solid #d4d4d4;
+    background: #f1f1f1;
+    list-style: none;
+}
+
+#main .subMenu ul li a {
+    display: block;
+    text-align: center;
+    color: #000;
+    text-decoration: none;
+    background: none;
+    height: 50px;
+    line-height: 50px;
+    font-size: 28px;
+}
+
+#main .subMenu ul li a:hover {
+    color: #177cb7;
+    background: none;
+}
+
+#footer {
+    background: #d1dce3;
+    height: 50px;
+    line-height: 50px;
+    font-size: 25px;
+    text-align: center;
+}
+
+#main .container .arguments {
+    border: 5px solid #ccc;
+    float: left;
+    width: 200px;
+    height: 500px;
+}
+
+#main .container .img_canvas {
+    border: 5px solid #000;
+    float: left;
+    width: 500px;
+    height: 500px;
+}
+
+#main .container .message {
+    border: 5px solid #00f;
+    float: left;
+    width: 300px;
+    height: 500px;
+}

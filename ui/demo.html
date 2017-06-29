@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>云图像处理首页</title>
+    <link rel="stylesheet" type="text/css" href="/css/mycss.css">
+  </head>
+  <body>
+    <div id="header">
+      <h1><a href="#">云图像处理demo</a></h1>
+      <ul>
+	<li><a href="#">设为首页</a></li>
+	<li><a href="#">加入收藏</a></li>
+      </ul>
+    </div>
+    <div id="menu" class="clear">
+      <ul>
+	<li><a>图像</a>
+	  <ul>
+	    <li>
+	      <a href="javascript:void(0)">
+		<div id="open_image">打开图像</div>
+		<input type="file" name="file0" id="img_file" style="display:none"/>
+	      </a>
+	    </li>
+	  </ul>
+	</li>
+	<li><a>普通操作</a>
+	  <ul>
+	    <li>
+	      <a href="javascript:void(0)">
+		<div id="gray_scale">灰度化</div>
+	      </a>
+	    </li>
+	    <li>
+	      <a href="javascript:void(0)">
+		<div id="sharpen">锐化</div>
+	      </a>
+	    </li>
+	    <li>
+	      <a href="javascript:void(0)">
+		<div id="blur">模糊</div>
+	      </a>
+	    </li>
+	  </ul>	    
+	</li>
+	<li><a href="#">特殊操作</a></li>
+	<li><a href="#">帮助</a></li>
+      </ul>
+    </div>
+    <div id="main">
+      <div class="container">
+	<!-- 一行三列-->
+	<!-- 左侧是参数列表 中间是操作图像 右侧是返回消息-->
+	<div class="arguments">
+	</div>
+	<div class="img_canvas">
+	</div>
+	<div class="message">
+	</div>
+      </div>
+    </div>
+      
+    <script type="text/javascript" src="/js/functions-demo.js"></script>
+  </body>
+</html>
+	
+	
+    
