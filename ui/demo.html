@@ -19,9 +19,11 @@
 	  <ul>
 	    <li>
 	      <a href="javascript:void(0)">
-		<div id="open_image">打开图像</div>
-		<input type="file" name="file0" id="img_file" style="display:none"/>
-	      </a>
+		<div id="open_image">打开URL</div>
+	      </a>	      
+	    </li>
+	    <li>
+	      <input type="file" value="打开图像文件" name="image_file" id="img_file_btn"/> <!-- style="display:none"/> -->
 	    </li>
 	  </ul>
 	</li>
@@ -54,7 +56,10 @@
 	<!-- 左侧是参数列表 中间是操作图像 右侧是返回消息-->
 	<div class="arguments">
 	</div>
-	<div class="img_canvas">
+	<div class="img_canvas" id="img_div">
+	  <canvas id="src_canvas">
+	    <!-- <img id="src_img" src="file:///F:/relaxation/pictures/girl.jpg"></img> -->
+	  </canvas>
 	</div>
 	<div class="message">
 	</div>

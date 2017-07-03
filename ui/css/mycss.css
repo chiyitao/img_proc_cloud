@@ -137,7 +137,7 @@ body {
     float: left;
     width: 150px;
 }
-
+/*
 #main .container dl dt img {
     border: 1px solid #ccc;
     width: 150px;
@@ -226,6 +226,7 @@ body {
     color: #177cb7;
     background: none;
 }
+*/
 
 #footer {
     background: #d1dce3;
@@ -240,6 +241,7 @@ body {
     float: left;
     width: 200px;
     height: 500px;
+    overflow: auto;
 }
 
 #main .container .img_canvas {
@@ -247,6 +249,15 @@ body {
     float: left;
     width: 500px;
     height: 500px;
+    overflow: auto; /* so beatiful */
+}
+
+#main .container .img_canvas #src_canvas{
+    border: 0px solid #000;
+    float: left;
+    /* width: 500px;
+    height: 500px;
+   */
 }
 
 #main .container .message {
@@ -254,4 +265,5 @@ body {
     float: left;
     width: 300px;
     height: 500px;
+    overflow: auto;
 }

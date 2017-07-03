@@ -6,6 +6,8 @@ $('#open_image').on('click', function(){
     }
     
     var imgURL = 'http://img.blog.csdn.net/20160713111856694?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center'; // 'http://fj.ikafan.com/attachment/forum/201510/16/150108pf2fgjw7i33bq22w.jpg.thumb.jpg';
+    // var imgURL = 'file:///F:/relaxation/pictures/girl.jpg';
+    // var imgURL = 'http://www.jxteacher.com/userfiles/hpqing/images/0117%281%29.JPG';
     var img = new Image();
     // Below is very important. See: 'https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image'
     img.crossOrigin = 'Anonymous'; 

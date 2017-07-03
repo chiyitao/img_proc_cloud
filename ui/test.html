@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html>
+  <meta charset="utf-8"/>
+  <head>
+    <style>
+      body {
+      margin: 0px;
+      padding: 0px;
+      }
+</style>
+    <script src="/js/jquery-1.12.4.js"></script>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="578" height="200"></canvas>
+    <br>
+    <textarea id='img_textarea' cols="200" rows="10"></textarea>
+    <script>
+      function loadCanvas(dataURL) {
+      var canvas = document.getElementById('myCanvas');
+      var context = canvas.getContext('2d');
+
+      // load image from data url
+      var imageObj = new Image();
+      imageObj.onload = function() {
+      context.drawImage(this, 0, 0);
+      };
+
+      imageObj.src = dataURL;
+      }
+
+      // make ajax call to get image data url
+
+var img_url = 'http://oss.youkouyang.com/1.jpg'; //
+img_url = 'http://www.jxteacher.com/userfiles/hpqing/images/0117%281%29.JPG';
+      var request = new XMLHttpRequest();
+      request.open('GET', img_url, true);
+
+request.setRequestHeader('Content-Type', 'image/jpeg');
+request.requestType = 'blob';
+      request.onreadystatechange = function() {
+      // Makes sure the document is ready to parse.
+      if(request.readyState == 4) {
+      // Makes sure it's found the file.
+      if(request.status == 200) {
+      // loadCanvas(request.responseText);
+	  // write img data
+	  var textarea = document.getElementById('img_textarea');
+	  textarea.innerHTML = request.responseText;
+      }
+      }
+      };
+      request.send(null);
+
+      var url=img_url;
+
+      /*
+      $.ajax({
+      url:url,
+      dataType:'img/jpg',
+      processData: false,
+      type:'get',
+      success:function(data){
+      alert(data.name);
+      },
+      error:function(XMLHttpRequest, textStatus, errorThrown) {
+      alert(XMLHttpRequest.status);
+      alert(XMLHttpRequest.readyState);
+      alert(textStatus);
+      }});
+      */
+
+    </script>
+  </body>
+  </html>
