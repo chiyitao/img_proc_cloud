@@ -105,6 +105,8 @@ gray_scale_div.onclick = function() {
     }
     */
 
+
+    /*
     var canvas = document.getElementById('src_canvas');
     var ctx = canvas.getContext('2d');
     var img_data = ctx.getImageData(0, 0, canvas.width, canvas.height); // canvas.width, canvas.height);    
@@ -113,7 +115,7 @@ gray_scale_div.onclick = function() {
     var img_width = canvas.width;
     var img_height = canvas.height;
     var img_channel_num = img_data.data.length / (img_width * img_height);
-
+    */
 
 
     // image_data_acquire
@@ -139,7 +141,7 @@ gray_scale_div.onclick = function() {
     */
 
 
-
+    // TODO: encapsulated the following codes into a function
     var xml_http = new XMLHttpRequest();
     var uri = 'general_process';
     xml_http.open('POST', uri, true);
@@ -165,6 +167,55 @@ gray_scale_div.onclick = function() {
     };
     xml_http.send(post_data);
 };
+
+/* sharpen */
+var sharpen_div = document.getElementById('sharpen');
+sharpen_div.onclick = function() {
+    
+    var ida = new image_data_acquire();
+
+    var gray_scale_args = '{null:null}';
+
+    var src_ips = ida.get_image_process_info('src_canvas', 'sharpen', gray_scale_args);
+
+
+    var ip_strmz = new image_process_streamization();
+    
+    var post_data = ip_strmz.ips_to_http_content(src_ips);
+
+    // TODO: encapsulated the following codes into a function
+    var xml_http = new XMLHttpRequest();
+    var uri = 'general_process';
+    xml_http.open('POST', uri, true);
+    xml_http.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xml_http.onreadystatechange = function() {
+	if (xml_http.readyState == 4 && xml_http.status == 200) {
+	    // alert(xml_http.responseText);
+	    var irs_str = xml_http.responseText;
+	    // streamization/destreamization object
+	    var img_res_stream = new image_result_streamization();
+	    // destreamized
+	    var irs = img_res_stream.http_content_to_irs(irs_str);
+	    // display the image data
+	    var start_left_top_pos = new point(0, 0);
+	    var img_disp = new image_display();
+	    var canvas_id = "src_canvas";
+	    img_disp.put_image_data_on_canvas(irs, canvas_id, start_left_top_pos);
+	    
+	    // alert(irs_values[1]);
+	    // alert(irs_str);
+	    
+	}
+    };
+    xml_http.send(post_data);
+
+    
+
+}
+
+
+/////////////////////////////////////////////////////////////////
+// useful class and methods
 
 function image_data_acquire() {
 
@@ -405,23 +456,27 @@ image_display.prototype.convert_to_js_ImageData = function(ctx, img_data, img_si
     }
     else if (img_channel_num == 3) {
 	// color image, must append the alpha value
-	var img_pixel_count = img_data.length / 3;
+	console.log('img_channel_num = ' + img_channel_num);
+
+	var img_pixel_count = img_data.length; // every pixel is a 3-element array.
 	for (var i = 0; i < img_pixel_count; i++) {
-	    js_ImageData.data[4 * i + 0] = img_data[3 * i + 0];
-	    js_ImageData.data[4 * i + 1] = img_data[3 * i + 1];
-	    js_ImageData.data[4 * i + 2] = img_data[3 * i + 2];
+	    js_ImageData.data[4 * i + 0] = img_data[i][0];
+	    js_ImageData.data[4 * i + 1] = 0; // img_data[i][1];
+	    js_ImageData.data[4 * i + 2] = 0; // img_data[i][2];
 	    js_ImageData.data[4 * i + 3] = 255;
 	}
 	// return js_img_data;
     }
     else {
 	// rgba image, keep it as origin
-	var img_pixel_count = img_data.length / 4;
+	console.log('img_channel_num = ' + img_channel_num);
+	var img_pixel_count = img_data.length; // every pixel is a 4-element array.
 	for (var i = 0; i < img_pixel_count; i++) {
-	    js_ImageData.data[4 * i + 0] = img_data[4 * i + 0];
-	    js_ImageData.data[4 * i + 1] = img_data[4 * i + 1];
-	    js_ImageData.data[4 * i + 2] = img_data[4 * i + 2];
-	    js_ImageData.data[4 * i + 3] = img_data[4 * i + 3];
+	    js_ImageData.data[4 * i + 0] = img_data[i][0];
+	    js_ImageData.data[4 * i + 1] = img_data[i][1];
+	    js_ImageData.data[4 * i + 2] = img_data[i][2];
+	    // js_ImageData.data[4 * i + 3] = img_data[i][3];
+	    js_ImageData.data[4 * i + 3] = 255;
 	}
 	// js_img_data = img_data;
     }

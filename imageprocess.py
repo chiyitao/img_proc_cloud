@@ -128,13 +128,43 @@ class ImageProcessModule():
         if proc_op == 'gray_scale':
             dst_img = cv2.cvtColor(src_img, cv2.COLOR_BGR2GRAY)
         elif proc_op == 'sharpen':
-            dst_img_x = cv2.Sobel(src_img, cv2.CV_16S, 1, 0)
-            dst_img_y = cv2.Sobel(src_img, cv2.CV_16S, 0, 1)
+            if (src_img.shape[2] == 4):
+                src_img_b, src_img_g, src_img_r, src_img_a = cv2.split(src_img)
 
-            abs_x = cv2.convertScaleAbs(dst_img_x)
-            abs_y = cv2.convertScaleAbs(dst_img_y)
+                dst_img_b_x = cv2.Sobel(src_img_b, cv2.CV_16S, 1, 0)
+                dst_img_b_y = cv2.Sobel(src_img_b, cv2.CV_16S, 0, 1)
 
-            dst_img = cv2.addWeighted(abx_x, 0.5, abs_y, 0.5, 0)
+                abs_b_x = cv2.convertScaleAbs(dst_img_b_x)
+                abs_b_y = cv2.convertScaleAbs(dst_img_b_y)
+
+                dst_img_b = cv2.addWeighted(abs_b_x, 0.5, abs_b_y, 0.5, 0)
+
+                dst_img_g_x = cv2.Sobel(src_img_g, cv2.CV_16S, 1, 0)
+                dst_img_g_y = cv2.Sobel(src_img_g, cv2.CV_16S, 0, 1)
+
+                abs_g_x = cv2.convertScaleAbs(dst_img_g_x)
+                abs_g_y = cv2.convertScaleAbs(dst_img_g_y)
+
+                dst_img_g = cv2.addWeighted(abs_g_x, 0.5, abs_g_y, 0.5, 0)
+                
+
+                dst_img_r_x = cv2.Sobel(src_img_r, cv2.CV_16S, 1, 0)
+                dst_img_r_y = cv2.Sobel(src_img_r, cv2.CV_16S, 0, 1)
+
+                abs_r_x = cv2.convertScaleAbs(dst_img_r_x)
+                abs_r_y = cv2.convertScaleAbs(dst_img_r_y)
+
+                dst_img_r = cv2.addWeighted(abs_r_x, 0.5, abs_r_y, 0.5, 0)
+                
+                dst_img = cv2.merge((dst_img_b, dst_img_g, dst_img_r))
+            
+                # dst_img_x = cv2.Sobel(src_img, cv2.CV_16S, 1, 0)
+                # dst_img_y = cv2.Sobel(src_img, cv2.CV_16S, 0, 1)
+
+                # abs_x = cv2.convertScaleAbs(dst_img_x)
+                # abs_y = cv2.convertScaleAbs(dst_img_y)
+
+                # dst_img = cv2.addWeighted(abs_x, 0.5, abs_y, 0.5, 0)
         else:
             print 'the operation is not defined!'
 
@@ -366,9 +396,9 @@ class ImageProcessModule():
         'IMG_CHANNEL_NUM=' + str(irs.img_channel_num) + '\r\n' + \
         'ERR_INFO=' + irs.err_info + '\r\n'
         # debug start
-        irs_str_file = open('irs_str.txt', 'w')
-        irs_str_file.writelines(irs_str)
-        irs_str_file.close()
+        # irs_str_file = open('irs_str.txt', 'w')
+        # irs_str_file.writelines(irs_str)
+        # irs_str_file.close()
         # debug end
         return irs_str
     
