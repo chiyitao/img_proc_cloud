@@ -237,7 +237,7 @@ class ImageProcessModule():
         # print str(img_height) + '\n'
         # print str(img_width * img_height * 4) + '\n'
         
-        dst_img = []
+        img_data = []
         if img_width * img_height == img_data_len:
             # grayscale image
             img_data = img_data.reshape(img_width, img_height)
