@@ -3,6 +3,7 @@ import StringIO
 import sys
 import os
 import array
+import re
 
 from imageprocess import ImageProcessModule, IMAGE_PROCESS_URLS
 
@@ -59,13 +60,16 @@ class WSGIServer(object):
             request_len += len(cur_pack)
             # print 'now cur_pack is %d' % request_len
             # print 'cur_pack is: '
-            # print cur_pack
+            print cur_pack
+            
             if request_len < 1024:
                 break
             else:
                 if cur_pack.endswith('\r\n\r\n\r\n\r\n'): # self defined
                     break
 
+
+        
         self.request_data = request_data
                 
         # self.request_data = request_data = self.client_connection.recv(1024 * 1024 * 3)
@@ -93,13 +97,28 @@ class WSGIServer(object):
     def parse_request(self, text):
         # request_line = text.splitlines()[0]
         request_line = text.split('\r\n')
-        print request_line[0]
+        # request_line = text.split()
+        # print 'text is :'        
+        # print text
         
-        # Break down the request line into components
-        (self.request_method, # GET
-         self.path, # /hello
-         self.request_version # HTTP/1.1
-         ) = request_line[0].split()
+        # req_line_len = len(request_line)
+        # print req_line_len
+        
+
+        # request_line is empty
+        if len(request_line) == 0:
+            print 'request error'
+            return -1
+
+        # request_line has data
+        req_pattern = re.compile(r'[a-zA-Z]+\s\S+\sHTTP.+')
+        req_match = req_pattern.match(request_line[0])
+        if req_match:        
+            # Break down the request line into components
+            (self.request_method, # GET
+             self.path, # /hello
+             self.request_version # HTTP/1.1
+            ) = request_line[0].split()
 
     def get_environ(self):
         env = {}
