@@ -10,7 +10,7 @@ import array
 
 IMAGE_PROCESS_URLS = {'1':'/general_process', '2':'/special_process', }
 
-IMAGE_PROCESS_GENERAL_OP = {'1':'gray_scale', '2': 'sharpen', '3': 'blur', }
+IMAGE_PROCESS_GENERAL_OP = {'1':'gray_scale', '2': 'revert', '3': 'sharpen', '4': 'blur', }
 
 class image_process_struct:
     img_proc_op = ''    
@@ -127,44 +127,90 @@ class ImageProcessModule():
         dis_img = []
         if proc_op == 'gray_scale':
             dst_img = cv2.cvtColor(src_img, cv2.COLOR_BGR2GRAY)
-        elif proc_op == 'sharpen':
-            if (src_img.shape[2] == 4):
-                src_img_b, src_img_g, src_img_r, src_img_a = cv2.split(src_img)
-
-                dst_img_b_x = cv2.Sobel(src_img_b, cv2.CV_16S, 1, 0)
-                dst_img_b_y = cv2.Sobel(src_img_b, cv2.CV_16S, 0, 1)
-
-                abs_b_x = cv2.convertScaleAbs(dst_img_b_x)
-                abs_b_y = cv2.convertScaleAbs(dst_img_b_y)
-
-                dst_img_b = cv2.addWeighted(abs_b_x, 0.5, abs_b_y, 0.5, 0)
-
-                dst_img_g_x = cv2.Sobel(src_img_g, cv2.CV_16S, 1, 0)
-                dst_img_g_y = cv2.Sobel(src_img_g, cv2.CV_16S, 0, 1)
-
-                abs_g_x = cv2.convertScaleAbs(dst_img_g_x)
-                abs_g_y = cv2.convertScaleAbs(dst_img_g_y)
-
-                dst_img_g = cv2.addWeighted(abs_g_x, 0.5, abs_g_y, 0.5, 0)
-                
-
-                dst_img_r_x = cv2.Sobel(src_img_r, cv2.CV_16S, 1, 0)
-                dst_img_r_y = cv2.Sobel(src_img_r, cv2.CV_16S, 0, 1)
-
-                abs_r_x = cv2.convertScaleAbs(dst_img_r_x)
-                abs_r_y = cv2.convertScaleAbs(dst_img_r_y)
-
-                dst_img_r = cv2.addWeighted(abs_r_x, 0.5, abs_r_y, 0.5, 0)
-                
-                dst_img = cv2.merge((dst_img_b, dst_img_g, dst_img_r))
+        elif proc_op == 'revert':
             
-                # dst_img_x = cv2.Sobel(src_img, cv2.CV_16S, 1, 0)
-                # dst_img_y = cv2.Sobel(src_img, cv2.CV_16S, 0, 1)
+            src_img_b, src_img_g, src_img_r, src_img_a = cv2.split(src_img)
 
-                # abs_x = cv2.convertScaleAbs(dst_img_x)
-                # abs_y = cv2.convertScaleAbs(dst_img_y)
+            dst_img_b = 255 - src_img_b
+            dst_img_g = 255 - src_img_g
+            dst_img_r = 255 - src_img_r
 
-                # dst_img = cv2.addWeighted(abs_x, 0.5, abs_y, 0.5, 0)
+            dst_img = cv2.merge((dst_img_b, dst_img_g, dst_img_r))
+            
+        elif proc_op == 'sharpen':
+            src_img_flt = numpy.float32(src_img)
+            kernel = numpy.array([[0,-1,0], [-1,5,-1], [0,-1,0]], numpy.int8)
+            src_img_b, src_img_g, src_img_r, src_img_a = cv2.split(src_img_flt)
+            
+            dst_img_b = numpy.uint8(cv2.filter2D(src_img_b, -1, kernel))
+            dst_img_g = numpy.uint8(cv2.filter2D(src_img_g, -1, kernel))
+            dst_img_r = numpy.uint8(cv2.filter2D(src_img_r, -1, kernel))
+
+            # dst_img = cv2.merge((src_img_b, src_img_g, src_img_r))
+
+            dst_img = cv2.merge((dst_img_b, dst_img_g, dst_img_r))
+
+            dst_img = cv2.filter2D(src_img, -1, kernel)
+            print dst_img.dtype
+
+            cv2.imwrite('filter2d.jpg', dst_img)
+            
+            return dst_img
+
+            dst_img_b = numpy.uint8(src_img_b / 2)
+            dst_img_g = numpy.uint8(src_img_g / 2)
+            dst_img_r = numpy.uint8(src_img_r / 2)
+            
+            dst_img = cv2.merge((dst_img_b, dst_img_g, dst_img_r))
+            print dst_img.dtype
+            
+            return dst_img
+
+
+
+            dst_img = numpy.zeros((src_img.shape[0], src_img.shape[1], 3))
+            dst_img_width = src_img.shape[0]
+            dst_img_height = src_img.shape[1]
+            for i in range(dst_img_height):
+                for j in range(dst_img_width):
+                    dst_img[j, i, 0] = dst_img_b[j,i]
+                    dst_img[j, i, 1] = dst_img_g[j,i]
+                    dst_img[j, i, 2] = dst_img_r[j,i]
+
+            
+
+            # end
+            
+            # pass
+            # src_img_b, src_img_g, src_img_r, src_img_a = cv2.split(src_img)
+
+            # dst_img_b_x = cv2.Sobel(src_img_b, cv2.CV_16S, 1, 0)
+            # dst_img_b_y = cv2.Sobel(src_img_b, cv2.CV_16S, 0, 1)
+
+            # abs_b_x = cv2.convertScaleAbs(dst_img_b_x)
+            # abs_b_y = cv2.convertScaleAbs(dst_img_b_y)
+
+            # dst_img_b = cv2.addWeighted(abs_b_x, 0.5, abs_b_y, 0.5, 0)
+
+            # dst_img_g_x = cv2.Sobel(src_img_g, cv2.CV_16S, 1, 0)
+            # dst_img_g_y = cv2.Sobel(src_img_g, cv2.CV_16S, 0, 1)
+
+            # abs_g_x = cv2.convertScaleAbs(dst_img_g_x)
+            # abs_g_y = cv2.convertScaleAbs(dst_img_g_y)
+
+            # dst_img_g = cv2.addWeighted(abs_g_x, 0.5, abs_g_y, 0.5, 0)
+                
+
+            # dst_img_r_x = cv2.Sobel(src_img_r, cv2.CV_16S, 1, 0)
+            # dst_img_r_y = cv2.Sobel(src_img_r, cv2.CV_16S, 0, 1)
+
+            # abs_r_x = cv2.convertScaleAbs(dst_img_r_x)
+            # abs_r_y = cv2.convertScaleAbs(dst_img_r_y)
+
+            # dst_img_r = cv2.addWeighted(abs_r_x, 0.5, abs_r_y, 0.5, 0)
+                
+            # dst_img = cv2.merge((dst_img_b, dst_img_g, dst_img_r))
+            
         else:
             print 'the operation is not defined!'
 
@@ -179,16 +225,23 @@ class ImageProcessModule():
         src_img = []
         if img_width * img_height == img_data_len:
             # grayscale image
-            src_img = img_data.reshape(img_width, img_height)
-        elif img_width * img_height * 3 == img_data_len:
+            src_img = img_data.reshape(img_height, img_width)
+        elif img_width * img_height * 3 == img_data_len:            
             # RGB image
-            src_img = img_data.reshape(img_width, img_height, 3)
+            print '_get_image(): 3 channel'
+            src_inter_img = img_data.reshape(img_height, img_width, 3)
+            split_img_0, split_img_1, split_img_2 = cv2.split(src_inter_img)
+            src_img = cv2.merge([split_img_2, split_img_1, split_img_0])
+            
         elif img_width * img_height * 4 == img_data_len:
             # RGBA image
-            src_img = img_data.reshape(img_width, img_height, 4)            
+            print '_get_image(): 4 channel'
+            src_inter_img = img_data.reshape(img_height, img_width, 4)
+            split_img_0, split_img_1, split_img_2, split_img_a = cv2.split(src_inter_img)
+            src_img = cv2.merge([split_img_2, split_img_1, split_img_0, split_img_a])
         else:
             print 'acquired img_data error!'
-            src_img = []
+            src_img = []        
         return src_img        
         
     def _convert_to_image(self, data_line, size_line):
@@ -240,13 +293,13 @@ class ImageProcessModule():
 
         if img_width * img_height == img_data_len:
             # grayscale image
-            img_data = img_data.reshape(img_width, img_height)
+            img_data = img_data.reshape(img_height, img_width)
         elif img_width * img_height * 3 == img_data_len:
             # RGB image
-            img_data = img_data.reshape(img_width, img_height, 3)
+            img_data = img_data.reshape(img_height, img_width, 3)
         elif img_width * img_height * 4 == img_data_len:
             # RGBA image
-            img_data = img_data.reshape(img_width, img_height, 4)            
+            img_data = img_data.reshape(img_height, img_width, 4)            
         else:
             print 'acquired img_data error!'
             img_data = []
@@ -292,7 +345,6 @@ class ImageProcessModule():
             # TODO: define special operations and handle the irs properly.
             dst_irs = image_result_struct([], (), 0, '')
             dst_irs.err_info = 'Not implemented!'
-
             irs_str = self._serialize_irs(dst_irs)
             
             return 404, [irs_str, ]
@@ -352,6 +404,11 @@ class ImageProcessModule():
 
         # get the image from ips
         src_img = self._get_image(ips.img_data, ips.img_size)
+        print src_img.shape
+
+        # debug
+        cv2.imwrite('src_img.jpg', src_img)
+        
         # process the image
         dst_img = self._process_image(ips.img_proc_op, src_img, ips.img_proc_args)
 
@@ -396,9 +453,9 @@ class ImageProcessModule():
         'IMG_CHANNEL_NUM=' + str(irs.img_channel_num) + '\r\n' + \
         'ERR_INFO=' + irs.err_info + '\r\n'
         # debug start
-        # irs_str_file = open('irs_str.txt', 'w')
-        # irs_str_file.writelines(irs_str)
-        # irs_str_file.close()
+        irs_str_file = open('irs_str.txt', 'w')
+        irs_str_file.writelines(irs_str)
+        irs_str_file.close()
         # debug end
         return irs_str
     

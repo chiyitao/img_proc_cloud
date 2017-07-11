@@ -60,7 +60,7 @@ class WSGIServer(object):
             request_len += len(cur_pack)
             # print 'now cur_pack is %d' % request_len
             # print 'cur_pack is: '
-            print cur_pack
+            # print cur_pack
             
             if request_len < 1024:
                 break

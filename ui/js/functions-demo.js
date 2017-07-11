@@ -168,6 +168,53 @@ gray_scale_div.onclick = function() {
     xml_http.send(post_data);
 };
 
+/* revert */
+
+var revert_div = document.getElementById('revert');
+revert_div.onclick = function() {
+    
+    var ida = new image_data_acquire();
+
+    var gray_scale_args = '{null:null}';
+
+    var src_ips = ida.get_image_process_info('src_canvas', 'revert', gray_scale_args);
+
+
+    var ip_strmz = new image_process_streamization();
+    
+    var post_data = ip_strmz.ips_to_http_content(src_ips);
+
+    // TODO: encapsulated the following codes into a function
+    var xml_http = new XMLHttpRequest();
+    var uri = 'general_process';
+    xml_http.open('POST', uri, true);
+    xml_http.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xml_http.onreadystatechange = function() {
+	if (xml_http.readyState == 4 && xml_http.status == 200) {
+	    // alert(xml_http.responseText);
+	    var irs_str = xml_http.responseText;
+	    // streamization/destreamization object
+	    var img_res_stream = new image_result_streamization();
+	    // destreamized
+	    var irs = img_res_stream.http_content_to_irs(irs_str);
+	    // display the image data
+	    var start_left_top_pos = new point(0, 0);
+	    var img_disp = new image_display();
+	    var canvas_id = "src_canvas";
+	    img_disp.put_image_data_on_canvas(irs, canvas_id, start_left_top_pos);
+	    
+	    // alert(irs_values[1]);
+	    // alert(irs_str);
+	    
+	}
+    };
+    xml_http.send(post_data);
+
+    
+
+}
+
+
 /* sharpen */
 var sharpen_div = document.getElementById('sharpen');
 sharpen_div.onclick = function() {
@@ -354,6 +401,22 @@ image_result_streamization.prototype.http_content_to_irs = function(irs_str) {
 	}
     }
 
+
+    /* fix me */
+    /*
+    var array_height = irs_img_data_two_dim[0].length;
+    var array_width = irs_img_data_two_dim.length;
+    console.log('array_height = ' + array_height);
+    console.log('array_width = ' + array_width);
+
+    for (var j = 0; j < array_height; j++) {
+	for(var i = 0; i < array_width; i++) {
+	    irs_img_data[j * array_width + i] = irs_img_data_two_dim[i][j];	    
+	}
+	console.log('j = ' + j);
+    }
+    */
+
     // end of irs_img_data
 
     // alert(irs_img_data.length);
@@ -377,9 +440,9 @@ image_result_streamization.prototype.http_content_to_irs = function(irs_str) {
     // img_size
     var irs_img_size_str = irs_val_strs[irs_key_dict['irs_img_size']].split('=')[1];
     var irs_img_size_str_array = irs_img_size_str.split(', '); // the space cannot be omitted
-    var irs_img_width = parseInt(irs_img_size_str_array[0].substr(1));
-    var irs_img_height_str_len = irs_img_size_str_array[1].length;
-    var irs_img_height = parseInt(irs_img_size_str_array[1].substr(0, irs_img_height_str_len-1));
+    var irs_img_height = parseInt(irs_img_size_str_array[0].substr(1));
+    var irs_img_width_str_len = irs_img_size_str_array[1].length;
+    var irs_img_width = parseInt(irs_img_size_str_array[1].substr(0, irs_img_width_str_len-1));
     var irs_img_size = new Array(irs_img_width, irs_img_height);
 
     // debug
@@ -430,6 +493,7 @@ image_display.prototype.put_image_data_on_canvas = function(irs, canvas_id, star
     // draw the canvas
 
     if(js_img_data != null){
+	// ctx.putImageData(js_img_data, start_pos.x + irs.img_size[0] / 2, start_pos.y, 0, 0, irs.img_size[0] / 2, irs.img_size[1]);
 	ctx.putImageData(js_img_data, start_pos.x, start_pos.y, 0, 0, irs.img_size[0], irs.img_size[1]);
     }
 };
@@ -459,12 +523,38 @@ image_display.prototype.convert_to_js_ImageData = function(ctx, img_data, img_si
 	console.log('img_channel_num = ' + img_channel_num);
 
 	var img_pixel_count = img_data.length; // every pixel is a 3-element array.
+	// var i = 0;
+	
 	for (var i = 0; i < img_pixel_count; i++) {
-	    js_ImageData.data[4 * i + 0] = img_data[i][0];
-	    js_ImageData.data[4 * i + 1] = 0; // img_data[i][1];
-	    js_ImageData.data[4 * i + 2] = 0; // img_data[i][2];
-	    js_ImageData.data[4 * i + 3] = 255;
+	    // if (i < img_pixel_count ) {
+		// var index = parseInt(i * 2 / 3);
+		// console.log(index);
+		// var index = i % 3;
+		js_ImageData.data[4 * i + 0] = img_data[i][2]; // B//  * 256 / img_pixel_count;
+		js_ImageData.data[4 * i + 1] = img_data[i][1]; // G
+		js_ImageData.data[4 * i + 2] = img_data[i][0]; // R
+		js_ImageData.data[4 * i + 3] = 255;
+	    // } else {
+	    /*
+		js_ImageData.data[4 * i + 0] = 255;
+		js_ImageData.data[4 * i + 1] = 255;
+		js_ImageData.data[4 * i + 2] = 255;
+		js_ImageData.data[4 * i + 3] = 255;
+	    }
+	    */
+		
 	}
+	
+	/*
+	for (var i = 0; i < img_size[1]; i++) { // height
+	    for (var j = 0; j < img_size[0]; j++) { // width		
+		js_ImageData.data[4 * (i * img_size[0] + j) + 0] = img_data[i * img_size[0] + j][0];
+		js_ImageData.data[4 * (i * img_size[0] + j) + 1] = img_data[i * img_size[0] + j][1];
+		js_ImageData.data[4 * (i * img_size[0] + j) + 2] = img_data[i * img_size[0] + j][2];
+		js_ImageData.data[4 * (i * img_size[0] + j) + 3] = 255;
+	    }
+	}
+	*/
 	// return js_img_data;
     }
     else {
@@ -472,9 +562,9 @@ image_display.prototype.convert_to_js_ImageData = function(ctx, img_data, img_si
 	console.log('img_channel_num = ' + img_channel_num);
 	var img_pixel_count = img_data.length; // every pixel is a 4-element array.
 	for (var i = 0; i < img_pixel_count; i++) {
-	    js_ImageData.data[4 * i + 0] = img_data[i][0];
-	    js_ImageData.data[4 * i + 1] = img_data[i][1];
-	    js_ImageData.data[4 * i + 2] = img_data[i][2];
+	    js_ImageData.data[4 * i + 0] = img_data[i][2]; // B
+	    js_ImageData.data[4 * i + 1] = img_data[i][1]; // G
+	    js_ImageData.data[4 * i + 2] = img_data[i][0]; // R
 	    // js_ImageData.data[4 * i + 3] = img_data[i][3];
 	    js_ImageData.data[4 * i + 3] = 255;
 	}
