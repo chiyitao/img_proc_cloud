@@ -6,11 +6,15 @@ import cv2
 import string
 import array
 
+import json
+
 # import json
 
 IMAGE_PROCESS_URLS = {'1':'/general_process', '2':'/special_process', }
 
 IMAGE_PROCESS_GENERAL_OP = {'1':'gray_scale', '2': 'revert', '3': 'sharpen', '4': 'blur', }
+
+IMAGE_PROCESS_SPECIAL_OP = {'1':'binarize', '2': 'find_line',  }
 
 class image_process_struct:
     img_proc_op = ''    
@@ -119,7 +123,7 @@ class ImageProcessModule():
             img_proc_op, img_data, img_size, img_channel_num, img_proc_args            
             )
 
-    def _process_image(self, proc_op, src_img, proc_args):
+    def _general_process_image(self, proc_op, src_img, proc_args):
         # don't check. Arguments were already checked in _image_operation
 
         # TODO: Reconstruct the following code, seperate every
@@ -155,27 +159,27 @@ class ImageProcessModule():
 
             cv2.imwrite('filter2d.jpg', dst_img)
             
-            return dst_img
+            # return dst_img
 
-            dst_img_b = numpy.uint8(src_img_b / 2)
-            dst_img_g = numpy.uint8(src_img_g / 2)
-            dst_img_r = numpy.uint8(src_img_r / 2)
+            # dst_img_b = numpy.uint8(src_img_b / 2)
+            # dst_img_g = numpy.uint8(src_img_g / 2)
+            # dst_img_r = numpy.uint8(src_img_r / 2)
             
-            dst_img = cv2.merge((dst_img_b, dst_img_g, dst_img_r))
-            print dst_img.dtype
+            # dst_img = cv2.merge((dst_img_b, dst_img_g, dst_img_r))
+            # print dst_img.dtype
             
-            return dst_img
+            # return dst_img
 
 
 
-            dst_img = numpy.zeros((src_img.shape[0], src_img.shape[1], 3))
-            dst_img_width = src_img.shape[0]
-            dst_img_height = src_img.shape[1]
-            for i in range(dst_img_height):
-                for j in range(dst_img_width):
-                    dst_img[j, i, 0] = dst_img_b[j,i]
-                    dst_img[j, i, 1] = dst_img_g[j,i]
-                    dst_img[j, i, 2] = dst_img_r[j,i]
+            # dst_img = numpy.zeros((src_img.shape[0], src_img.shape[1], 3))
+            # dst_img_width = src_img.shape[0]
+            # dst_img_height = src_img.shape[1]
+            # for i in range(dst_img_height):
+            #    for j in range(dst_img_width):
+            #        dst_img[j, i, 0] = dst_img_b[j,i]
+            #        dst_img[j, i, 1] = dst_img_g[j,i]
+            #        dst_img[j, i, 2] = dst_img_r[j,i]
 
             
 
@@ -210,12 +214,44 @@ class ImageProcessModule():
             # dst_img_r = cv2.addWeighted(abs_r_x, 0.5, abs_r_y, 0.5, 0)
                 
             # dst_img = cv2.merge((dst_img_b, dst_img_g, dst_img_r))
+
             
         else:
             print 'the operation is not defined!'
 
         return dst_img        
 
+    def _special_process_image(self, proc_op, src_img, proc_args):
+        dst_img = []
+        # special processing
+        if proc_op == 'binarize':
+            # debug
+            print proc_args
+
+            gray_img = []
+            # if the channel number does not equal to 1
+            # convert the image to gray
+            if len(src_img.shape) > 2:
+                gray_img = cv2.cvtColor(src_img, cv2.COLOR_BGR2GRAY)
+            else:
+                gray_img = src_img # already a gray scale image
+
+            # threshold value
+            args_dict = json.loads(proc_args)
+
+            # FIXME: if args_dict['threshold'] does not exist,
+            # handle the error case.
+            img_thres = int(args_dict['threshold'])
+            
+            (T, bin_img) = cv2.threshold(gray_img, img_thres, \
+                                         255, cv2.THRESH_BINARY)
+
+            dst_img = bin_img        
+
+        else:
+            print('special operation not found.')
+
+        return dst_img
 
     def _get_image(self, img_data, img_size):
         img_width = img_size[0]
@@ -334,7 +370,7 @@ class ImageProcessModule():
                 return 200, [empty_irs_json, ]
 
             # destination image result struct
-            dst_img_irs = self._image_operation(src_img_proc_struct)
+            dst_img_irs = self._general_image_operation(src_img_proc_struct)
 
             # serialize
             irs_json = self._serialize_irs(dst_img_irs)
@@ -343,11 +379,22 @@ class ImageProcessModule():
 
         elif req_path == IMAGE_PROCESS_URLS['2']:
             # TODO: define special operations and handle the irs properly.
-            dst_irs = image_result_struct([], (), 0, '')
-            dst_irs.err_info = 'Not implemented!'
-            irs_str = self._serialize_irs(dst_irs)
+            # dst_irs = image_result_struct([], (), 0, '')
+            # dst_irs.err_info = 'Not implemented!'
+            ## serialize
+            # irs_str = self._serialize_irs(dst_irs)
             
-            return 404, [irs_str, ]
+            src_img_proc_struct = self._req_data_to_img_proc_struct(req_data)
+            if self._validate_initial_ips(src_img_proc_struct) == False:
+                empty_irs_json = self._serialize_irs(image_result_struct([], (), 0, ''))
+                return 200, [empty_irs_json, ]            
+            
+            # destination image result struct
+            dst_img_irs = self._special_image_operation(src_img_proc_struct)
+            
+            irs_json = self._serialize_irs(dst_img_irs)
+            
+            return 200, [irs_json, ]
         else:
             null_irs = image_result_struct([], (), 0, '')
             null_irs.err_info = 'The page requested is not found.'
@@ -385,7 +432,7 @@ class ImageProcessModule():
         
 
 
-    def _image_operation(self, ips):
+    def _general_image_operation(self, ips):
         # ips is defined as image process struct
 
         # irs is defined as image result struct
@@ -410,7 +457,58 @@ class ImageProcessModule():
         cv2.imwrite('src_img.jpg', src_img)
         
         # process the image
-        dst_img = self._process_image(ips.img_proc_op, src_img, ips.img_proc_args)
+        dst_img = self._general_process_image(ips.img_proc_op, src_img, ips.img_proc_args)
+
+        if dst_img == []:
+            irs.img_data = []
+            irs.img_size = ()
+            irs.err_info == 'there is some error during the processing of image.'
+            return irs
+                
+        # convert dst_img to image_result_struct after every operation
+        # irs.img_data = dst_img.data
+        irs.img_data = dst_img
+        irs.img_size = dst_img.shape[:2]
+
+        # debug
+        # print 'len of dst_img.shape = ' + str(len(dst_img.shape))
+        # debug end
+        
+        if len(dst_img.shape) == 2:
+            irs.img_channel_num = 1
+        else:
+            irs.img_channel_num = dst_img.shape[2]
+        # print 'irs.img_channel_num' + str(irs.img_channel_num)
+        
+        irs.err_info = 'Success'
+        return irs
+    
+    def _special_image_operation(self, ips):
+        # ips is defined as image process struct
+
+        # irs is defined as image result struct
+        irs = image_result_struct([], (), 0, '')
+        if ips.img_proc_op not in IMAGE_PROCESS_SPECIAL_OP.values():
+            irs.err_info = 'operation is not defined.'            
+            return irs
+        if ips.img_data == []:
+            irs.err_info = 'image data is invalid.'
+            return irs
+        if ips.img_size == ():
+            irs.err_info = 'image size is invalid.'
+            return irs
+        # TODO: check other parameters.
+        
+
+        # get the image from ips
+        src_img = self._get_image(ips.img_data, ips.img_size)
+        print src_img.shape
+
+        # debug
+        cv2.imwrite('src_img.jpg', src_img)
+        
+        # process the image
+        dst_img = self._special_process_image(ips.img_proc_op, src_img, ips.img_proc_args)
 
         if dst_img == []:
             irs.img_data = []

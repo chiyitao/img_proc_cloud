@@ -260,6 +260,47 @@ sharpen_div.onclick = function() {
 
 }
 
+/* binarize */
+var binarize_div = document.getElementById('binarize');
+binarize_div.onclick = function() {
+    
+    var ida = new image_data_acquire();
+
+    var binarize_args = '{"threshold":128}';
+
+    var src_ips = ida.get_image_process_info('src_canvas', 'binarize', binarize_args);
+
+    var ip_strmz = new image_process_streamization();
+    
+    var post_data = ip_strmz.ips_to_http_content(src_ips);
+
+    // TODO: encapsulated the following codes into a function
+    var xml_http = new XMLHttpRequest();
+    var uri = 'special_process';
+    xml_http.open('POST', uri, true);
+    xml_http.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xml_http.onreadystatechange = function() {
+	if (xml_http.readyState == 4 && xml_http.status == 200) {
+	    // alert(xml_http.responseText);
+	    var irs_str = xml_http.responseText;
+	    // streamization/destreamization object
+	    var img_res_stream = new image_result_streamization();
+	    // destreamized
+	    var irs = img_res_stream.http_content_to_irs(irs_str);
+	    // display the image data
+	    var start_left_top_pos = new point(0, 0);
+	    var img_disp = new image_display();
+	    var canvas_id = "src_canvas";
+	    img_disp.put_image_data_on_canvas(irs, canvas_id, start_left_top_pos);
+	    
+	    // alert(irs_values[1]);
+	    // alert(irs_str);
+	    
+	}
+    };
+    xml_http.send(post_data);
+}
+
 
 /////////////////////////////////////////////////////////////////
 // useful class and methods
