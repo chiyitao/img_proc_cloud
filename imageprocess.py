@@ -14,7 +14,7 @@ IMAGE_PROCESS_URLS = {'1':'/general_process', '2':'/special_process', }
 
 IMAGE_PROCESS_GENERAL_OP = {'1':'gray_scale', '2': 'revert', '3': 'sharpen', '4': 'blur', }
 
-IMAGE_PROCESS_SPECIAL_OP = {'1':'binarize', '2': 'find_line',  }
+IMAGE_PROCESS_SPECIAL_OP = {'1':'binarize', '2': 'find_lines',  }
 
 class image_process_struct:
     img_proc_op = ''    
@@ -231,7 +231,7 @@ class ImageProcessModule():
             gray_img = []
             # if the channel number does not equal to 1
             # convert the image to gray
-            if len(src_img.shape) > 2:
+            if len(src_img.shape) > 1:
                 gray_img = cv2.cvtColor(src_img, cv2.COLOR_BGR2GRAY)
             else:
                 gray_img = src_img # already a gray scale image
@@ -246,8 +246,33 @@ class ImageProcessModule():
             (T, bin_img) = cv2.threshold(gray_img, img_thres, \
                                          255, cv2.THRESH_BINARY)
 
-            dst_img = bin_img        
+            dst_img = bin_img
+            
+        elif proc_op == IMAGE_PROCESS_SPECIAL_OP['2']: # find_lines
+            
+            gray_img = []
+            if len(src_img.shape) > 1:
+                gray_img = cv2.cvtColor(src_img, cv2.COLOR_BGRA2GRAY)
+            else:
+                gray_img = src_img # already a gray scale image            
 
+            edges = cv2.Canny(gray_img, 50, 150)
+            
+            # TODO: these arguments should be set in input args
+            thres_vote = 100 # min vote argument
+            minLineLength = 100
+            maxLineGap = 10
+            
+            lines = cv2.HoughLinesP(edges, 1, numpy.pi/180, thres_vote, \
+                                    minLineLength, maxLineGap)
+            
+            lines1 = lines[:, 0, :]
+
+            for x1, y1, x2, y2 in lines1:
+                # last argument is the width of the line
+                cv2.line(src_img, (x1, y1), (x2, y2), (0,255,0), 2) 
+
+            dst_img = src_img
         else:
             print('special operation not found.')
 
